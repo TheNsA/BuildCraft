@@ -50,6 +50,8 @@ import cpw.mods.fml.common.network.Player;
 
 public class PipeTransportItems extends PipeTransport {
 
+	public static final int MAX_PIPE_STACKS = 64;
+	public static final int MAX_PIPE_ITEMS = 512;
 	public boolean allowBouncing = false;
 	public Map<Integer, EntityData> travelingEntities = new HashMap<Integer, EntityData>();
 	private final List<EntityData> entitiesToLoad = new LinkedList<EntityData>();
@@ -120,16 +122,33 @@ public class PipeTransportItems extends PipeTransport {
 
 		if (!worldObj.isRemote) {
 			sendItemPacket(data);
-		}
 
-		if (!worldObj.isRemote && travelingEntities.size() > BuildCraftTransport.groupItemsTrigger) {
-			groupEntities();
+			if (travelingEntities.size() > BuildCraftTransport.groupItemsTrigger) {
+				groupEntities();
+			}
 
-			if (travelingEntities.size() > BuildCraftTransport.maxItemsInPipes) {
-				BlockUtil.explodeBlock(worldObj, xCoord, yCoord, zCoord);
+			if (travelingEntities.size() > MAX_PIPE_STACKS) {
+				destroyPipe();
+				return;
+			}
+
+			int numItems = 0;
+			for (EntityData ed : travelingEntities.values()) {
+				ItemStack stack = ed.item.getItemStack();
+				if (stack != null && stack.stackSize > 0)
+					numItems += stack.stackSize;
+			}
+
+			if (numItems > MAX_PIPE_ITEMS) {
+				destroyPipe();
 				return;
 			}
 		}
+	}
+	
+	private void destroyPipe() {
+		BlockUtil.explodeBlock(worldObj, xCoord, yCoord, zCoord);
+		worldObj.setBlockToAir(xCoord, yCoord, zCoord);
 	}
 
 	/**

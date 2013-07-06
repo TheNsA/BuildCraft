@@ -9,6 +9,7 @@
 
 package buildcraft.transport;
 
+import buildcraft.BuildCraftCore;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -47,11 +48,12 @@ import buildcraft.transport.network.PacketPipeTransportNBT;
 import buildcraft.transport.network.PacketSimpleId;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
+import java.util.logging.Level;
 
 public class PipeTransportItems extends PipeTransport {
 
 	public static final int MAX_PIPE_STACKS = 64;
-	public static final int MAX_PIPE_ITEMS = 512;
+	public static final int MAX_PIPE_ITEMS = 1024;
 	public boolean allowBouncing = false;
 	public Map<Integer, EntityData> travelingEntities = new HashMap<Integer, EntityData>();
 	private final List<EntityData> entitiesToLoad = new LinkedList<EntityData>();
@@ -128,6 +130,7 @@ public class PipeTransportItems extends PipeTransport {
 			}
 
 			if (travelingEntities.size() > MAX_PIPE_STACKS) {
+				BuildCraftCore.bcLog.log(Level.WARNING, String.format("Pipe exploded at %d,%d,%d because it had too many stacks: %d", xCoord, yCoord, zCoord, travelingEntities.size()));
 				destroyPipe();
 				return;
 			}
@@ -140,6 +143,7 @@ public class PipeTransportItems extends PipeTransport {
 			}
 
 			if (numItems > MAX_PIPE_ITEMS) {
+				BuildCraftCore.bcLog.log(Level.WARNING, String.format("Pipe exploded at %d,%d,%d because it had too many items: %d", xCoord, yCoord, zCoord, numItems));
 				destroyPipe();
 				return;
 			}
